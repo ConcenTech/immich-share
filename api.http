@@ -1,0 +1,49 @@
+@baseUrl = https://demo.immich.app/api
+@accessToken = TeOxz5zRFbgoVazZ8GM5vVFvDL5qA7DDCeBjoj6yY
+@userId = 67914a2e-f084-4062-abf0-a8e9859d9dcb
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email" : "demo@immich.app",
+    "password": "demo"
+}
+
+### Check auth token
+POST {{baseUrl}}/auth/validateToken
+Accept: application/json
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Accept: application/json
+
+### Change password
+POST {{baseUrl}}/auth/change-password
+Content-Type: application/json
+Accept: application/json
+
+{
+    "newPassword": "my-new-pass",
+    "password": "demo"
+}
+
+### All shared albums
+GET {{baseUrl}}/albums?shared=true
+Accept: application/json
+
+### All personal albums
+GET {{baseUrl}}/albums?shared=false
+Accept: application/json
+
+### Get album info without assets, use hash to check content
+GET {{baseUrl}}/albums/96b48132-b667-4f29-9653-c680c0c10def
+?withoutAssets=true
+Accept: application/json
+
+### Get album info with assets
+GET {{baseUrl}}/albums/96b48132-b667-4f29-9653-c680c0c10def
+?withoutAssets=false
+Accept: application/json
