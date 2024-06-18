@@ -37,4 +37,13 @@ class Album {
       isActivityEnabled: json['isActivityEnabled'],
     );
   }
+
+  @override
+  String toString() {
+    return '[Album:$id]'
+        '\n$name'
+        '\n$description'
+        '\nThumbnail: $thumbnailId'
+        '\n${isActivityEnabled ? "Activity enabled." : "Activity disabled."}';
+  }
 }

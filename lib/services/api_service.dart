@@ -5,6 +5,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/album.dart';
 import '../models/asset.dart';
@@ -14,15 +15,18 @@ import '../models/user.dart';
 const _applicationJson = 'application/json';
 
 class ApiService {
-  const ApiService(this._dio);
+  const ApiService(this._dio, this._cookieJar);
 
   final Dio _dio;
+  final CookieJar _cookieJar;
 
   Future<bool> checkAndSetEndpoint(String serverUrl) async {
     // verify endpoint
     _dio.options.baseUrl = serverUrl;
     _dio.options.headers = {'Accept': _applicationJson};
-    _dio.interceptors.add(CookieManager(PersistCookieJar()));
+
+    _dio.interceptors.clear();
+    _dio.interceptors.add(CookieManager(_cookieJar));
 
     return true;
   }
@@ -33,13 +37,18 @@ class ApiService {
   Future<User> login(String email, String password) async {
     _expectEndpointSet();
 
-    final body = await _post('api/auth/login', data: {
-      'email': email,
-      'password': password,
-    }, headers: {
-      'Accept': _applicationJson,
-      'Content-Type': _applicationJson,
-    });
+    final body = await _post(
+      'api/auth/login',
+      data: {
+        'email': email,
+        'password': password,
+      },
+      headers: {
+        'Accept': _applicationJson,
+        'Content-Type': _applicationJson,
+      },
+      sample: JSON_MAP,
+    );
 
     return User.fromJson(body);
   }
@@ -52,7 +61,10 @@ class ApiService {
   Future<bool> validateAuthToken(String token) async {
     _expectEndpointSet();
 
-    final body = await _post('api/auth/validateToken');
+    final body = await _post(
+      'api/auth/validateToken',
+      sample: JSON_MAP,
+    );
 
     return body['authStatus'];
   }
@@ -65,7 +77,10 @@ class ApiService {
   Future<bool> logout() async {
     _expectEndpointSet();
 
-    final body = await _post('api/auth/logout');
+    final body = await _post(
+      'api/auth/logout',
+      sample: JSON_MAP,
+    );
 
     return body['successful'];
   }
@@ -85,6 +100,7 @@ class ApiService {
       headers: {
         'Content-Type': _applicationJson,
       },
+      sample: JSON_MAP,
     );
   }
 
@@ -97,18 +113,10 @@ class ApiService {
     final body = await _get(
       'api/albums',
       queryParameters: {'shared': 'true'},
+      sample: JSON_LIST,
     );
 
-    print(body);
-    return [];
-
-    // final data = List.from(body);
-
-    // return data
-    //     .map((e) => Album.fromJson(
-    //           JsonMap.from(e),
-    //         ))
-    //     .toList();
+    return body.map((e) => Album.fromJson(e)).toList();
   }
 
   /// Gets assets for the selected album.
@@ -117,7 +125,7 @@ class ApiService {
   Future<List<Asset>> getAlbumAssets(String albumId) async {
     _expectEndpointSet();
 
-    final body = await _get('api/albums/$albumId');
+    final body = await _get('api/albums/$albumId', sample: JSON_MAP);
 
     final assets = List.from(body['assets']);
 
@@ -136,8 +144,10 @@ class ApiService {
     }
   }
 
-  /// Returns the body of a request if valid, otherwise throws.
-  Future<JsonMap> _extractBodyFromResponse(Response response) async {
+  /// Extracts a json object from the request.
+  ///
+  /// Throws [ApiException] if the request was not valid or extraction failed.
+  Future<JsonMap> _extractObjectFromResponse(Response response) async {
     if (response.statusCode == null || response.statusCode! > 201) {
       throw ApiException.fromResponse(response);
     }
@@ -163,16 +173,46 @@ class ApiService {
     return body;
   }
 
+  /// Extracts a list of json objects from the request.
+  ///
+  /// Throws [ApiException] if the request was not valid or extraction failed.
+  Future<List<JsonMap>> _extractObjectListFromResponse(
+      Response response) async {
+    if (response.statusCode == null || response.statusCode! > 201) {
+      throw ApiException.fromResponse(response);
+    }
+
+    List<JsonMap>? body;
+
+    if (response.data is String) {
+      response.data = await compute(
+        (String j) => json.decode(j),
+        response.data as String,
+      );
+    }
+
+    if (response.data != null) {
+      body = List.from(response.data).map((e) => JsonMap.from(e)).toList();
+    }
+
+    if (body == null ||
+        body.isEmpty ||
+        response.statusCode == HttpStatus.noContent) {
+      return [];
+    }
+
+    return body;
+  }
+
   /// Sends a post request with the supplied data.
   ///
   /// Returns the response data as a [String]
   ///
   /// Throws [ApiException] if unsuccessful.
-  Future<JsonMap> _post(
-    String endpoint, {
-    JsonMap? data,
-    Map<String, String>? headers,
-  }) async {
+  Future<T> _post<T>(String endpoint,
+      {JsonMap? data, Map<String, String>? headers, T? sample}) async {
+    assert(sample != null && (sample is JsonMap || sample is List<JsonMap>));
+
     try {
       final response = await _dio.post(
         endpoint,
@@ -180,7 +220,9 @@ class ApiService {
         options: Options(headers: headers),
       );
 
-      return _extractBodyFromResponse(response);
+      return sample is JsonMap?
+          ? await _extractObjectFromResponse(response) as T
+          : await _extractObjectListFromResponse(response) as T;
     } on DioException catch (e) {
       // Unable to reach endpoint.
       print(e.stackTrace);
@@ -195,19 +237,24 @@ class ApiService {
   /// Returns the response data as a [String]
   ///
   /// Throws [ApiException] if unsuccessful.
-  Future<JsonMap> _get(
+  Future<T> _get<T>(
     String endpoint, {
     String? data,
     Map<String, String>? queryParameters,
+    T? sample,
   }) async {
+    assert(sample != null && (sample is JsonMap || sample is List<JsonMap>));
+
     try {
-      final response = await _dio.post(
+      final response = await _dio.get(
         endpoint,
         data: data,
         queryParameters: queryParameters,
       );
 
-      return _extractBodyFromResponse(response);
+      return sample is JsonMap
+          ? await _extractObjectFromResponse(response) as T
+          : await _extractObjectListFromResponse(response) as T;
     } on DioException catch (e) {
       // Unable to reach endpoint.
       throw ApiException(

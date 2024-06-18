@@ -9,7 +9,7 @@ Accept: application/json
 
 {
     "email" : "test@email.com",
-    "password": "demo"
+    "password": "demo123456"
 }
 
 ### Check auth token

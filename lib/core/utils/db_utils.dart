@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 
 /// FNV-1a 64bit hash algorithm optimized for Dart Strings
 int fastHash(String string) {
