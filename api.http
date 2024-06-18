@@ -1,4 +1,4 @@
-@baseUrl = https://demo.immich.app/api
+@baseUrl = https://photos.concentechltd.co.uk/api
 @accessToken = TeOxz5zRFbgoVazZ8GM5vVFvDL5qA7DDCeBjoj6yY
 @userId = 67914a2e-f084-4062-abf0-a8e9859d9dcb
 
@@ -8,7 +8,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "email" : "demo@immich.app",
+    "email" : "test@email.com",
     "password": "demo"
 }
 
@@ -26,7 +26,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "newPassword": "my-new-pass",
+    "newPassword": "demo123456",
     "password": "demo"
 }
 
@@ -39,11 +39,11 @@ GET {{baseUrl}}/albums?shared=false
 Accept: application/json
 
 ### Get album info without assets, use hash to check content
-GET {{baseUrl}}/albums/96b48132-b667-4f29-9653-c680c0c10def
+GET {{baseUrl}}/albums/dfab5afd-cec1-4224-8da2-fef934b3205f
 ?withoutAssets=true
 Accept: application/json
 
 ### Get album info with assets
-GET {{baseUrl}}/albums/96b48132-b667-4f29-9653-c680c0c10def
+GET {{baseUrl}}/albums/dfab5afd-cec1-4224-8da2-fef934b3205f
 ?withoutAssets=false
 Accept: application/json

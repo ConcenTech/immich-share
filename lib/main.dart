@@ -1,7 +1,29 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:immich_share/services/api_service.dart';
 
 void main() {
-  runApp(const MainApp());
+  test();
+
+  // runApp(const MainApp());
+}
+
+void test() async {
+  try {
+    final api = ApiService(Dio());
+    print('Setup endpoint');
+    await api.checkAndSetEndpoint('https://photos.concentechltd.co.uk/');
+    print('login');
+    await api.login('test@email.com', 'demo123456');
+    print('get shared albums');
+    await api.getSharedAlbums();
+  } on ApiException catch (e) {
+    debugPrint(e.message);
+  }
+
+  exit(0);
 }
 
 class MainApp extends StatelessWidget {
