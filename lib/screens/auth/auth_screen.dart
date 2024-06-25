@@ -11,21 +11,15 @@ class TestScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const DesktopWindowTitlebar(),
-          Expanded(
-            child: Center(
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text('Back'),
-              ),
-            ),
-          )
-        ],
+    return AppScaffold(
+      showTitleBar: true,
+      body: Center(
+        child: FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Back'),
+        ),
       ),
     );
   }

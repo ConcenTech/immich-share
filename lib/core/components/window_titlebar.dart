@@ -16,13 +16,21 @@ class DesktopWindowTitlebar extends StatelessWidget {
     super.key,
   });
 
+  static void openWindow() {
+    if (_desktopPlatforms.contains(defaultTargetPlatform)) {
+      doWhenWindowReady(() {
+        appWindow.show();
+      });
+    }
+  }
+
   /// If true, displays the app logo and name in the top bar.
   final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
     assert(_desktopPlatforms.contains(defaultTargetPlatform));
-    
+
     return WindowTitleBarBox(
       child: Row(
         children: [

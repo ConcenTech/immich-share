@@ -25,10 +25,11 @@ class AppScaffold extends StatelessWidget {
         return Scaffold(
           appBar: showTitleBar
               ? AppBar(
+                automaticallyImplyLeading: false,
                   title: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      LogoImage(),
+                      SizedBox(height: 25, child: LogoImage()),
                       SizedBox(width: 5),
                       LogoText(tagline: false),
                     ],

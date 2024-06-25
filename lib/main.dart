@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:album_share/core/components/window_titlebar.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
@@ -16,9 +17,7 @@ void main() {
     ),
   );
 
-  doWhenWindowReady(() {
-    appWindow.show();
-  });
+  DesktopWindowTitlebar.openWindow();
 }
 
 class MainApp extends StatelessWidget {
