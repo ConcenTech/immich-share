@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 typedef JsonMap = Map<String, dynamic>;
+typedef JsonList = List<JsonMap>;
 
-const JSON_MAP = <String,dynamic>{};
-const JSON_LIST = <JsonMap>[];
+const JsonMap JSON_MAP = <String, dynamic>{};
+const JsonList JSON_LIST = <JsonMap>[];

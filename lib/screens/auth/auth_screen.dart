@@ -1,25 +1,59 @@
+import 'package:album_share/core/components/window_titlebar.dart';
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:immich_share/screens/auth/endpoint_widget.dart';
+
+import '../../core/components/app_scaffold.dart';
+import '../../core/components/logo_widget.dart';
+import 'endpoint_widget.dart';
+
+class TestScreen extends StatelessWidget {
+  const TestScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          const DesktopWindowTitlebar(),
+          Expanded(
+            child: Center(
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Back'),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
+      showTitleBar: false,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 300),
           child: const Card(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
+            child: SingleChildScrollView(
+                   padding: EdgeInsets.all(8.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(
-                    height: 60,
-                    child: FlutterLogo(),
+                    height: 45,
+                    child: LogoImage(),
                   ),
+                  LogoText(),
+                  SizedBox(height: 10),
                   AuthScreenContent(),
                 ],
               ),
@@ -44,7 +78,18 @@ class _AuthScreenContentState extends State<AuthScreenContent> {
   @override
   Widget build(BuildContext context) {
     return switch (_state) {
-      _State.endpoint => const EndpointWidget(),
+      _State.endpoint => EndpointWidget(
+          onEndpointSaved: () {
+            // setState(() {
+            //   _state = _State.login;
+            // });
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const TestScreen(),
+              ),
+            );
+          },
+        ),
       _State _ => const Placeholder(),
     };
   }

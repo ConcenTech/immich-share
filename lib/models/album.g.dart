@@ -22,23 +22,28 @@ const AlbumSchema = CollectionSchema(
       name: r'description',
       type: IsarType.string,
     ),
-    r'id': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 1,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'id': PropertySchema(
+      id: 2,
       name: r'id',
       type: IsarType.string,
     ),
     r'isActivityEnabled': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isActivityEnabled',
       type: IsarType.bool,
     ),
     r'name': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'name',
       type: IsarType.string,
     ),
     r'thumbnailId': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'thumbnailId',
       type: IsarType.string,
     )
@@ -77,10 +82,11 @@ void _albumSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.description);
-  writer.writeString(offsets[1], object.id);
-  writer.writeBool(offsets[2], object.isActivityEnabled);
-  writer.writeString(offsets[3], object.name);
-  writer.writeString(offsets[4], object.thumbnailId);
+  writer.writeLong(offsets[1], object.hashCode);
+  writer.writeString(offsets[2], object.id);
+  writer.writeBool(offsets[3], object.isActivityEnabled);
+  writer.writeString(offsets[4], object.name);
+  writer.writeString(offsets[5], object.thumbnailId);
 }
 
 Album _albumDeserialize(
@@ -91,10 +97,10 @@ Album _albumDeserialize(
 ) {
   final object = Album(
     description: reader.readString(offsets[0]),
-    id: reader.readString(offsets[1]),
-    isActivityEnabled: reader.readBool(offsets[2]),
-    name: reader.readString(offsets[3]),
-    thumbnailId: reader.readString(offsets[4]),
+    id: reader.readString(offsets[2]),
+    isActivityEnabled: reader.readBool(offsets[3]),
+    name: reader.readString(offsets[4]),
+    thumbnailId: reader.readString(offsets[5]),
   );
   return object;
 }
@@ -109,12 +115,14 @@ P _albumDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
-    case 3:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -333,6 +341,58 @@ extension AlbumQueryFilter on QueryBuilder<Album, Album, QFilterCondition> {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'description',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> hashCodeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterFilterCondition> hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -803,6 +863,18 @@ extension AlbumQuerySortBy on QueryBuilder<Album, Album, QSortBy> {
     });
   }
 
+  QueryBuilder<Album, Album, QAfterSortBy> sortByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> sortByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Album, Album, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -862,6 +934,18 @@ extension AlbumQuerySortThenBy on QueryBuilder<Album, Album, QSortThenBy> {
   QueryBuilder<Album, Album, QAfterSortBy> thenByDescriptionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> thenByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Album, Album, QAfterSortBy> thenByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
     });
   }
 
@@ -934,6 +1018,12 @@ extension AlbumQueryWhereDistinct on QueryBuilder<Album, Album, QDistinct> {
     });
   }
 
+  QueryBuilder<Album, Album, QDistinct> distinctByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hashCode');
+    });
+  }
+
   QueryBuilder<Album, Album, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -972,6 +1062,12 @@ extension AlbumQueryProperty on QueryBuilder<Album, Album, QQueryProperty> {
   QueryBuilder<Album, String, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
+    });
+  }
+
+  QueryBuilder<Album, int, QQueryOperations> hashCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hashCode');
     });
   }
 

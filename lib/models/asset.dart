@@ -1,6 +1,6 @@
-import 'package:immich_share/core/utils/db_utils.dart';
 import 'package:isar/isar.dart';
 
+import '../core/utils/db_utils.dart';
 import 'json_map.dart';
 
 part 'asset.g.dart';
@@ -32,6 +32,14 @@ class Asset {
       createdAt: DateTime.parse(json['fileCreatedAt']),
       fileName: json['originalFileName'],
     );
+  }
+
+  @override
+  int get hashCode => id.hashCode ^ type.hashCode;
+  
+  @override
+  bool operator ==(Object other) {
+    return other is Asset && other.id == id && other.type == type;
   }
 }
 

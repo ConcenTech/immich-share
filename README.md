@@ -1,4 +1,4 @@
-# immich_share
+# album_share
 
 An unofficial Immich client based on the incredible work of ''.
 

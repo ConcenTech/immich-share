@@ -5,10 +5,10 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../models/album.dart';
 import '../models/asset.dart';
+import '../models/endpoint.dart';
 import '../models/json_map.dart';
 import '../models/user.dart';
 
@@ -20,7 +20,11 @@ class ApiService {
   final Dio _dio;
   final CookieJar _cookieJar;
 
-  Future<bool> checkAndSetEndpoint(String serverUrl) async {
+  Future<Endpoint?> checkAndSetEndpoint(String serverUrl) async {
+    if (serverUrl == _dio.options.baseUrl) {
+      return Endpoint(serverUrl);
+    }
+
     // verify endpoint
     _dio.options.baseUrl = serverUrl;
     _dio.options.headers = {'Accept': _applicationJson};
@@ -28,7 +32,7 @@ class ApiService {
     _dio.interceptors.clear();
     _dio.interceptors.add(CookieManager(_cookieJar));
 
-    return true;
+    return Endpoint(serverUrl);
   }
 
   /// Attempts to login with the supplied credentials.
@@ -47,7 +51,7 @@ class ApiService {
         'Accept': _applicationJson,
         'Content-Type': _applicationJson,
       },
-      sample: JSON_MAP,
+      expected: JSON_MAP,
     );
 
     return User.fromJson(body);
@@ -58,15 +62,26 @@ class ApiService {
   /// Return true if valid, otherwise returns false.
   ///
   /// Throws [ApiException] if unsuccessful.
-  Future<bool> validateAuthToken(String token) async {
+  Future<bool> validateAuthToken() async {
     _expectEndpointSet();
 
     final body = await _post(
       'api/auth/validateToken',
-      sample: JSON_MAP,
+      expected: JSON_MAP,
     );
 
     return body['authStatus'];
+  }
+
+  Future<User> currentUser() async {
+    _expectEndpointSet();
+
+    final body = await _post(
+      'api/users/me',
+      expected: JSON_MAP,
+    );
+
+    return User.fromJson(body);
   }
 
   /// Logs out the current user.
@@ -79,7 +94,7 @@ class ApiService {
 
     final body = await _post(
       'api/auth/logout',
-      sample: JSON_MAP,
+      expected: JSON_MAP,
     );
 
     return body['successful'];
@@ -100,7 +115,7 @@ class ApiService {
       headers: {
         'Content-Type': _applicationJson,
       },
-      sample: JSON_MAP,
+      expected: JSON_MAP,
     );
   }
 
@@ -113,7 +128,7 @@ class ApiService {
     final body = await _get(
       'api/albums',
       queryParameters: {'shared': 'true'},
-      sample: JSON_LIST,
+      expected: JSON_LIST,
     );
 
     return body.map((e) => Album.fromJson(e)).toList();
@@ -125,7 +140,7 @@ class ApiService {
   Future<List<Asset>> getAlbumAssets(String albumId) async {
     _expectEndpointSet();
 
-    final body = await _get('api/albums/$albumId', sample: JSON_MAP);
+    final body = await _get('api/albums/$albumId', expected: JSON_MAP);
 
     final assets = List.from(body['assets']);
 
@@ -209,9 +224,13 @@ class ApiService {
   /// Returns the response data as a [String]
   ///
   /// Throws [ApiException] if unsuccessful.
-  Future<T> _post<T>(String endpoint,
-      {JsonMap? data, Map<String, String>? headers, T? sample}) async {
-    assert(sample != null && (sample is JsonMap || sample is List<JsonMap>));
+  Future<T> _post<T>(
+    String endpoint, {
+    JsonMap? data,
+    Map<String, String>? headers,
+    required T expected,
+  }) async {
+    assert(expected is JsonMap || expected is List<JsonMap>);
 
     try {
       final response = await _dio.post(
@@ -220,7 +239,7 @@ class ApiService {
         options: Options(headers: headers),
       );
 
-      return sample is JsonMap?
+      return expected is JsonMap?
           ? await _extractObjectFromResponse(response) as T
           : await _extractObjectListFromResponse(response) as T;
     } on DioException catch (e) {
@@ -241,9 +260,9 @@ class ApiService {
     String endpoint, {
     String? data,
     Map<String, String>? queryParameters,
-    T? sample,
+    required T expected,
   }) async {
-    assert(sample != null && (sample is JsonMap || sample is List<JsonMap>));
+    assert(expected is JsonMap || expected is List<JsonMap>);
 
     try {
       final response = await _dio.get(
@@ -252,7 +271,7 @@ class ApiService {
         queryParameters: queryParameters,
       );
 
-      return sample is JsonMap
+      return expected is JsonMap
           ? await _extractObjectFromResponse(response) as T
           : await _extractObjectListFromResponse(response) as T;
     } on DioException catch (e) {
@@ -261,18 +280,6 @@ class ApiService {
           0, e.message ?? 'Internal error, request unsuccessful');
     }
   }
-}
-
-class AcceptHeaderOptions extends Options {
-  AcceptHeaderOptions() : super(headers: {'Accept': _applicationJson});
-}
-
-class AcceptContentTypeHeaderOptions extends Options {
-  AcceptContentTypeHeaderOptions()
-      : super(headers: {
-          'Accept': _applicationJson,
-          'Content-Type': _applicationJson,
-        });
 }
 
 class ApiException implements Exception {

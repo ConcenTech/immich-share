@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "immich_share" "\0"
+            VALUE "FileDescription", "album_share" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "immich_share" "\0"
+            VALUE "InternalName", "album_share" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "immich_share.exe" "\0"
-            VALUE "ProductName", "immich_share" "\0"
+            VALUE "OriginalFilename", "album_share.exe" "\0"
+            VALUE "ProductName", "album_share" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

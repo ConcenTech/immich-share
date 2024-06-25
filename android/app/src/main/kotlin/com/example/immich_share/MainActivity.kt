@@ -1,4 +1,4 @@
-package com.example.immich_share
+package com.example.album_share
 
 import io.flutter.embedding.android.FlutterActivity
 

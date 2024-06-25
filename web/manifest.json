@@ -1,6 +1,6 @@
 {
-    "name": "immich_share",
-    "short_name": "immich_share",
+    "name": "album_share",
+    "short_name": "album_share",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

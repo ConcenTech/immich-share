@@ -32,13 +32,18 @@ const AssetSchema = CollectionSchema(
       name: r'fileName',
       type: IsarType.string,
     ),
-    r'id': PropertySchema(
+    r'hashCode': PropertySchema(
       id: 3,
+      name: r'hashCode',
+      type: IsarType.long,
+    ),
+    r'id': PropertySchema(
+      id: 4,
       name: r'id',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'type',
       type: IsarType.byte,
       enumMap: _AssettypeEnumValueMap,
@@ -79,8 +84,9 @@ void _assetSerialize(
   writer.writeString(offsets[0], object.albumId);
   writer.writeDateTime(offsets[1], object.createdAt);
   writer.writeString(offsets[2], object.fileName);
-  writer.writeString(offsets[3], object.id);
-  writer.writeByte(offsets[4], object.type.index);
+  writer.writeLong(offsets[3], object.hashCode);
+  writer.writeString(offsets[4], object.id);
+  writer.writeByte(offsets[5], object.type.index);
 }
 
 Asset _assetDeserialize(
@@ -93,8 +99,8 @@ Asset _assetDeserialize(
     albumId: reader.readString(offsets[0]),
     createdAt: reader.readDateTime(offsets[1]),
     fileName: reader.readString(offsets[2]),
-    id: reader.readString(offsets[3]),
-    type: _AssettypeValueEnumMap[reader.readByteOrNull(offsets[4])] ??
+    id: reader.readString(offsets[4]),
+    type: _AssettypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
         AssetType.image,
   );
   return object;
@@ -114,8 +120,10 @@ P _assetDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (_AssettypeValueEnumMap[reader.readByteOrNull(offset)] ??
           AssetType.image) as P;
     default:
@@ -535,6 +543,58 @@ extension AssetQueryFilter on QueryBuilder<Asset, Asset, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Asset, Asset, QAfterFilterCondition> hashCodeEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Asset, Asset, QAfterFilterCondition> hashCodeGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Asset, Asset, QAfterFilterCondition> hashCodeLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'hashCode',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Asset, Asset, QAfterFilterCondition> hashCodeBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'hashCode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Asset, Asset, QAfterFilterCondition> idEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -810,6 +870,18 @@ extension AssetQuerySortBy on QueryBuilder<Asset, Asset, QSortBy> {
     });
   }
 
+  QueryBuilder<Asset, Asset, QAfterSortBy> sortByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Asset, Asset, QAfterSortBy> sortByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Asset, Asset, QAfterSortBy> sortById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -872,6 +944,18 @@ extension AssetQuerySortThenBy on QueryBuilder<Asset, Asset, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Asset, Asset, QAfterSortBy> thenByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Asset, Asset, QAfterSortBy> thenByHashCodeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'hashCode', Sort.desc);
+    });
+  }
+
   QueryBuilder<Asset, Asset, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -930,6 +1014,12 @@ extension AssetQueryWhereDistinct on QueryBuilder<Asset, Asset, QDistinct> {
     });
   }
 
+  QueryBuilder<Asset, Asset, QDistinct> distinctByHashCode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'hashCode');
+    });
+  }
+
   QueryBuilder<Asset, Asset, QDistinct> distinctById(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -966,6 +1056,12 @@ extension AssetQueryProperty on QueryBuilder<Asset, Asset, QQueryProperty> {
   QueryBuilder<Asset, String, QQueryOperations> fileNameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fileName');
+    });
+  }
+
+  QueryBuilder<Asset, int, QQueryOperations> hashCodeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'hashCode');
     });
   }
 

@@ -46,4 +46,12 @@ class Album {
         '\nThumbnail: $thumbnailId'
         '\n${isActivityEnabled ? "Activity enabled." : "Activity disabled."}';
   }
+
+  @override
+  int get hashCode => id.hashCode;
+  
+  @override
+  bool operator ==(Object other) {
+    return other is Album && other.id == id;
+  }
 }
